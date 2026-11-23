@@ -1,34 +1,29 @@
 package com.epam.gym_crm.entities;
 
-import jakarta.validation.constraints.NotEmpty;
-
-import java.util.Date;
+import java.time.LocalDate;
 
 public class Trainee extends User {
 
-    @NotEmpty
-    private Date birthdate;
-    @NotEmpty
+    private LocalDate dateOfBirth;
     private String address;
-    @NotEmpty
-    private int userId;
+    private Long userId;
 
     public Trainee() {
     }
 
-    public Trainee(String firstName, String lastName, String username, String password, Boolean isActive, Date birthdate, String address, int userId) {
+    public Trainee(String firstName, String lastName, String username, String password, Boolean isActive, LocalDate birthdate, String address, Long userId) {
         super(firstName, lastName, username, password, isActive);
-        this.birthdate = birthdate;
+        this.dateOfBirth = birthdate;
         this.address = address;
         this.userId = userId;
     }
 
-    public Date getBirthdate() {
-        return birthdate;
+    public LocalDate getDateOfBirth() {
+        return dateOfBirth;
     }
 
-    public void setBirthdate(Date birthdate) {
-        this.birthdate = birthdate;
+    public void setDateOfBirth(LocalDate dateOfBirth) {
+        this.dateOfBirth = dateOfBirth;
     }
 
     public String getAddress() {
@@ -39,11 +34,11 @@ public class Trainee extends User {
         this.address = address;
     }
 
-    public int getUserId() {
+    public Long getUserId() {
         return userId;
     }
 
-    public void setUserId(int userId) {
+    public void setUserId(Long userId) {
         this.userId = userId;
     }
 }

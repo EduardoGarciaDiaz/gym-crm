@@ -3,21 +3,16 @@ package com.epam.gym_crm.entities;
 import jakarta.validation.constraints.NotEmpty;
 
 public abstract class User {
-    @NotEmpty
     private String firstName;
-    @NotEmpty
     private String lastName;
-    @NotEmpty
     private String username;
-    @NotEmpty
     private String password;
-    @NotEmpty
-    private Boolean isActive;
+    private boolean isActive;
 
     public User() {
     }
 
-    public User(String firstName, String lastName, String username, String password, Boolean isActive) {
+    public User(String firstName, String lastName, String username, String password, boolean isActive) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.username = username;
@@ -57,11 +52,11 @@ public abstract class User {
         this.password = password;
     }
 
-    public Boolean getActive() {
+    public boolean getActive() {
         return isActive;
     }
 
-    public void setActive(Boolean active) {
+    public void setActive(boolean active) {
         isActive = active;
     }
 }

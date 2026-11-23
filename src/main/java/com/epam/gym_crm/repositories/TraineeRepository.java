@@ -1,30 +1,48 @@
 package com.epam.gym_crm.repositories;
 
-import com.epam.gym_crm.dtos.TraineeDTO;
+import com.epam.gym_crm.entities.Trainee;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
 
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Repository
 public class TraineeRepository {
-    private Map<Integer, TraineeDTO> trainees;
+    private Map<Long, Trainee> trainees = new ConcurrentHashMap<>();
 
-    public int createTrainee(TraineeDTO trainee) {
-        int nextId = trainees.keySet()
-                .stream()
-                .mapToInt(Integer::intValue)
-                .max()
-                .orElse(0) + 1;
-        trainees.put(nextId, trainee);
-        return nextId;
+    @Autowired
+    public void setTrainees(@Qualifier("traineeStorage") Map<Long, Trainee> trainees) {
+        this.trainees = trainees;
     }
 
-    public boolean deleteTrainee(int traineeId) {
-        if (trainees.containsKey(traineeId)) {
-            trainees.remove(traineeId);
+    private final AtomicLong idSequence = new AtomicLong(0);
+
+    public Trainee saveTrainee(Trainee trainee) {
+        if (trainee.getUserId() == null) {
+            trainee.setUserId(nextId());
         }
 
-        return true;
+        trainees.put(trainee.getUserId(), trainee);
+        return trainee;
+    }
+
+    public boolean deleteTraineeById(Long id) {
+        return trainees.remove(id) != null;
+    }
+
+    public boolean existsByUsername(String username) {
+        return trainees.values().stream()
+                .anyMatch(t -> username.equals(t.getUsername()));
+    }
+
+    private long nextId() {
+        return trainees.keySet().stream()
+                .mapToLong(Long::longValue)
+                .max()
+                .orElse(0L) + 1;
     }
 
 }

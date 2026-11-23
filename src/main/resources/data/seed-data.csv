@@ -1,0 +1,11 @@
+# TRAINEE,id,firstName,lastName,username,password,active,dateOfBirth,address
+TRAINEE,1,John,Smith,John.Smith,aB3dE5gH7j,true,1995-03-12,Av. Reforma 12
+TRAINEE,2,Maria,Lopez,Maria.Lopez,Zx9Kq2Lm4P,true,1998-07-21,Calle Juarez 45
+
+# TRAINER,id,firstName,lastName,username,password,active,specialization
+TRAINER,1,Ana,Torres,Ana.Torres,Qw8Er5Ty2U,true,Yoga
+TRAINER,2,Carlos,Ruiz,Carlos.Ruiz,Pl0Mk9Nj8B,true,Cardio
+
+# TRAINING,id,traineeId,trainerId,name,type,date,durationMinutes
+TRAINING,1,1,1,Morning Yoga,Yoga,2026-11-20,60
+TRAINING,2,2,2,Intense Cardio,Cardio,2026-11-21,45

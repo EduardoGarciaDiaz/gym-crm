@@ -12,34 +12,39 @@ import org.springframework.stereotype.Service;
 @Service
 public class TraineeService {
 
-    @Autowired
     private TraineeRepository traineeRepository;
     private CredentialsGenerator credentialsGenerator;
 
-    public TraineeService(CredentialsGenerator credentialsGenerator) {
+    @Autowired
+    public void setTraineeRepository(TraineeRepository traineeRepository) {
+        this.traineeRepository = traineeRepository;
+    }
+
+    @Autowired
+    public void setCredentialsGenerator(CredentialsGenerator credentialsGenerator) {
         this.credentialsGenerator = credentialsGenerator;
     }
 
-    public int createTrainee(TraineeDTO trainee) {
+    public Trainee createTrainee(TraineeDTO trainee) {
         String firstName = trainee.getFirstName();
         String lastName = trainee.getLastName();
+        boolean isActive = true;
 
         Trainee newTrainee = new Trainee();
         newTrainee.setFirstName(firstName);
         newTrainee.setLastName(lastName);
-        newTrainee.setUsername(credentialsGenerator.generateUsername(firstName, lastName));
+        newTrainee.setUsername(credentialsGenerator.generateUsername(firstName, lastName, traineeRepository::existsByUsername));
         newTrainee.setPassword(credentialsGenerator.generatePassword());
-        newTrainee.setActive(true); //Should it be always true or should it come from the TraineeDTO?
-        newTrainee.setBirthdate(trainee.getBirthdate());
+        newTrainee.setActive(isActive);
+        newTrainee.setDateOfBirth(trainee.getDateOfBirth());
         newTrainee.setAddress(trainee.getAddress());
-        int id = traineeRepository.createTrainee(trainee);
-        newTrainee.setUserId(id);
 
-        return id;
+        newTrainee = traineeRepository.saveTrainee(newTrainee);
+        return newTrainee;
     }
 
-    public boolean deleteTrainee(int traineeId) {
-        boolean isDeleted = traineeRepository.deleteTrainee(traineeId);
+    public boolean deleteTrainee(Long traineeId) {
+        boolean isDeleted = traineeRepository.deleteTraineeById(traineeId);
         return isDeleted;
     }
 
