@@ -34,7 +34,7 @@ public class TrainerRepository {
         return Optional.ofNullable(trainers.get(id));
     }
 
-    public boolean existByUsername(String username) {
+    public boolean existsByUsername(String username) {
         return trainers.values().stream()
                 .anyMatch( t -> username.equals(t.getUsername()));
     }

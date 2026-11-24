@@ -14,7 +14,7 @@ public class TrainingRepository {
     private Map<Long, Training> trainings;
 
     @Autowired
-    public void setTrainings(@Qualifier("TrainingStorage") Map<Long, Training> trainings) {
+    public void setTrainings(@Qualifier("trainingStorage") Map<Long, Training> trainings) {
         this.trainings = trainings;
     }
 

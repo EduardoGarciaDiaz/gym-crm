@@ -1,11 +1,11 @@
 package com.epam.gym_crm.services;
 
-//Trainee Service class should support possibility to create/update/delete/select Trainee profile.
-
 import com.epam.gym_crm.dtos.TraineeDTO;
 import com.epam.gym_crm.entities.Trainee;
 import com.epam.gym_crm.repositories.TraineeRepository;
 import com.epam.gym_crm.utils.CredentialsGenerator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +14,8 @@ import java.util.Optional;
 
 @Service
 public class TraineeService {
+
+    private static final Logger log = LoggerFactory.getLogger(TraineeService.class);
 
     private TraineeRepository traineeRepository;
     private CredentialsGenerator credentialsGenerator;
@@ -32,6 +34,7 @@ public class TraineeService {
         String firstName = trainee.getFirstName();
         String lastName = trainee.getLastName();
         boolean isActive = true;
+        log.info("Creating trainee {} {}", firstName, lastName);
 
         Trainee newTrainee = new Trainee();
         newTrainee.setFirstName(firstName);
@@ -41,19 +44,30 @@ public class TraineeService {
         newTrainee.setIsActive(isActive);
         newTrainee.setDateOfBirth(trainee.getDateOfBirth());
         newTrainee.setAddress(trainee.getAddress());
+        log.debug("Credentials generated for trainee, username={}", newTrainee.getUsername());
 
         newTrainee = traineeRepository.saveTrainee(newTrainee);
+        log.info("Trainee created with id={} and username={}", newTrainee.getUserId(), newTrainee.getUsername());
         return newTrainee;
     }
 
     public boolean deleteTrainee(Long traineeId) {
+        log.info("Deleting trainee with id={}", traineeId);
         boolean isDeleted = traineeRepository.deleteTraineeById(traineeId);
+
+        if (isDeleted) {
+            log.info("Trainee with id={} deleted", traineeId);
+        } else {
+            log.warn("Trainee with id={} not found, nothing deleted", traineeId);
+        }
         return isDeleted;
     }
 
     public Trainee updateTrainee(Long id, TraineeDTO traineeDTO) {
+        log.info("Updating trainee with id={}", id);
         Trainee trainee = traineeRepository.findTraineeById(id)
                 .orElseThrow(() -> {
+                    log.warn("Cannot update: trainee with id={} not found", id);
                     return new NoSuchElementException("Trainee not found: " + id);
                 });
 
@@ -62,10 +76,18 @@ public class TraineeService {
         trainee.setDateOfBirth(traineeDTO.getDateOfBirth());
         trainee.setAddress(traineeDTO.getAddress());
 
-        return traineeRepository.saveTrainee(trainee);
+        Trainee updated = traineeRepository.saveTrainee(trainee);
+        log.info("Trainee with id={} updated", id);
+        return updated;
     }
 
     public Optional<Trainee> getTraineeById(Long id) {
-        return traineeRepository.findTraineeById(id);
+        log.debug("Looking up trainee with id={}", id);
+        Optional<Trainee> trainee = traineeRepository.findTraineeById(id);
+
+        if (trainee.isEmpty()) {
+            log.debug("Trainee with id={} not found", id);
+        }
+        return trainee;
     }
 }

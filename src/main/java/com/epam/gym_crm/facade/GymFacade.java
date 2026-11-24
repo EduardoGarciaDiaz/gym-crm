@@ -59,7 +59,7 @@ public class GymFacade {
         return trainingService.createTraining(dto);
     }
 
-    public Training getTraining(Long id) {
-        trainingService.getTrainingById(id);
+    public Optional<Training> getTraining(Long id) {
+        return trainingService.getTrainingById(id);
     }
 }
