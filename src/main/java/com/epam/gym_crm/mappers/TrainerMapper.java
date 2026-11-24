@@ -14,12 +14,9 @@ public class TrainerMapper {
             throw new NullPointerException("TrainerDTO can not be null");
         }
 
-        TrainingType trainingType = new TrainingType(dto.getSpecialization());
-
         Trainer trainer = new Trainer();
         trainer.setFirstName(dto.getFirstName());
         trainer.setLastName(dto.getLastName());
-        trainer.setSpecialization(trainingType);
 
         return trainer;
     }
@@ -29,10 +26,7 @@ public class TrainerMapper {
             throw new IllegalArgumentException("Arguments TrainerDTO and Trainer cannot be null");
         }
 
-        TrainingType trainingType = new TrainingType(dto.getSpecialization());
-
         trainer.setFirstName(dto.getFirstName());
         trainer.setLastName(dto.getLastName());
-        trainer.setSpecialization(trainingType);
     }
 }

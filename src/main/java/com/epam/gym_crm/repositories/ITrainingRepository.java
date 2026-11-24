@@ -5,5 +5,4 @@ import com.epam.gym_crm.entities.Training;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ITrainingRepository extends JpaRepository<Training, Long> {
-    Training findByTrainingNameIgnoreCase(String name);
 }

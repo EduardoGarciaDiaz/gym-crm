@@ -39,7 +39,7 @@ public class GymFacade {
         return traineeService.updateTrainee(id, dto);
     }
 
-    public Trainee getTrainee(String username) {
+    public Optional<Trainee> getTrainee(String username) {
         return traineeService.getTraineeByUsername(username);
     }
 
@@ -51,7 +51,7 @@ public class GymFacade {
         return trainerService.updateTrainer(id, dto);
     }
 
-    public Trainer getTrainer(String username) {
+    public Optional<Trainer> getTrainer(String username) {
         return trainerService.getTrainerByUsername(username);
     }
 
@@ -59,7 +59,19 @@ public class GymFacade {
         return trainingService.createTraining(dto);
     }
 
-    public Training getTraining(String name) {
-        return trainingService.getTrainingByTrainingName(name);
+    public boolean changeTraineePassword(String username, String oldPassword, String newPassword) {
+        return traineeService.changePassword(username, oldPassword, newPassword);
+    }
+
+    public boolean toggleTraineeStatus(String username) {
+        return traineeService.toggleStatus(username);
+    }
+
+    public boolean changeTrainerPassword(String username, String oldPassword, String newPassword) {
+        return trainerService.changePassword(username, oldPassword, newPassword);
+    }
+
+    public boolean toggleTrainerStatus(String username) {
+        return trainerService.toggleStatus(username);
     }
 }

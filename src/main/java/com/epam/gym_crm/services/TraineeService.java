@@ -4,13 +4,19 @@ import com.epam.gym_crm.dtos.TraineeDTO;
 import com.epam.gym_crm.entities.Trainee;
 import com.epam.gym_crm.mappers.TraineeMapper;
 import com.epam.gym_crm.repositories.ITraineeRepository;
+import com.epam.gym_crm.repositories.IUserRepository;
 import com.epam.gym_crm.utils.CredentialsGenerator;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @Service
 public class TraineeService {
@@ -18,12 +24,18 @@ public class TraineeService {
     private static final Logger log = LoggerFactory.getLogger(TraineeService.class);
 
     private ITraineeRepository traineeRepository;
+    private IUserRepository userRepository;
     private CredentialsGenerator credentialsGenerator;
     private TraineeMapper traineeMapper;
 
     @Autowired
     public void setTraineeRepository(ITraineeRepository traineeRepository) {
         this.traineeRepository = traineeRepository;
+    }
+
+    @Autowired
+    public void setTraineeRepository(IUserRepository userRepository) {
+        this.userRepository = userRepository;
     }
 
     @Autowired
@@ -36,13 +48,13 @@ public class TraineeService {
         this.traineeMapper = traineeMapper;
     }
 
-    public Trainee createTrainee(TraineeDTO traineeDTO) {
+    public Trainee createTrainee(@NotNull @Valid TraineeDTO traineeDTO) {
         String firstName = traineeDTO.getFirstName();
         String lastName = traineeDTO.getLastName();
         String username = credentialsGenerator.generateUsername(
                 firstName,
                 lastName,
-                traineeRepository::existsByUsername
+                userRepository::existsByUsername
         );
 
         Trainee newTrainee = traineeMapper.dtoToTrainee(traineeDTO);
@@ -59,17 +71,17 @@ public class TraineeService {
 
     public boolean deleteTraineeByUsername(String username) {
         log.info("Deleting trainee with username={}", username);
-        if (username != null && traineeRepository.existsByUsername(username)) {
-            traineeRepository.deleteByUsername(username);
-            log.info("Trainee with id={} deleted", username);
+        long deleted = traineeRepository.deleteByUsername(username);
+
+        if (deleted > 0) {
+            log.info("Trainee with username={} deleted along with their trainings", username);
             return true;
-        } else {
-            log.warn("Trainee with id={} not found, nothing deleted", username);
-            return false;
         }
+        log.warn("Trainee with username={} not found, nothing deleted", username);
+        return false;
     }
 
-    public Trainee updateTrainee(Long id, TraineeDTO traineeDTO) {
+    public Trainee updateTrainee(Long id,@NotNull @Valid TraineeDTO traineeDTO) {
         log.info("Updating trainee with id={}", id);
 
         Trainee trainee = traineeRepository.findById(id)
@@ -85,23 +97,40 @@ public class TraineeService {
         return updated;
     }
 
-    public Trainee getTraineeByUsername(String username) {
+    @Transactional(readOnly = true)
+    public Optional<Trainee> getTraineeByUsername(String username) {
         log.debug("Looking up trainee with username={}", username);
-        Trainee trainee = traineeRepository.findByUsernameIgnoreCase(username);
+        return traineeRepository.findByUsername(username);
+    }
 
-        if (trainee == null) {
-            log.debug("Trainee with username={} not found", username);
+    public boolean changePassword(@NotBlank String username,
+                                  @NotBlank String oldPassword,
+                                  @NotBlank String newPassword) {
+        Trainee trainee = findOrThrow(username);
+
+        if (!trainee.getPassword().equals(oldPassword)) {
+            log.warn("Password change rejected for trainee {}: wrong current password", username);
+            return false;
         }
-        return trainee;
-    }
 
-    //TODO:
-    public boolean changePassword(String oldPassword, String newPassword) {
+        trainee.setPassword(newPassword);
+        log.info("Password changed for trainee {}", username);
         return true;
     }
 
-    //TODO:
-    public boolean changeTraineeStatus() {
-        return true;
+    public boolean toggleStatus(@NotBlank String username) {
+        Trainee trainee = findOrThrow(username);
+
+        trainee.setIsActive(!trainee.getIsActive());
+        log.info("Trainee {} is now {}", username, trainee.getIsActive() ? "active" : "inactive");
+        return trainee.getIsActive();
+    }
+
+    private Trainee findOrThrow(String username) {
+        return traineeRepository.findByUsername(username)
+                .orElseThrow(() -> {
+                    log.warn("Trainee with username={} not found", username);
+                    return new NoSuchElementException("Trainee not found: " + username);
+                });
     }
 }
