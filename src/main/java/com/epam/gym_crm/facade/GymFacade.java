@@ -31,16 +31,16 @@ public class GymFacade {
         return traineeService.createTrainee(dto);
     }
 
-    public boolean deleteTrainee(Long traineeId) {
-        return traineeService.deleteTraineeByUsername(traineeId);
+    public boolean deleteTrainee(String username) {
+        return traineeService.deleteTraineeByUsername(username);
     }
 
     public Trainee updateTrainee(Long id, TraineeDTO dto) {
         return traineeService.updateTrainee(id, dto);
     }
 
-    public Optional<Trainee> getTrainee(Long id) {
-        return traineeService.getTraineeByUsername(id);
+    public Trainee getTrainee(String username) {
+        return traineeService.getTraineeByUsername(username);
     }
 
     public Trainer createTrainer(TrainerDTO dto) {
@@ -51,15 +51,15 @@ public class GymFacade {
         return trainerService.updateTrainer(id, dto);
     }
 
-    public Optional<Trainer> getTrainer(Long id) {
-        return trainerService.getTrainerById(id);
+    public Trainer getTrainer(String username) {
+        return trainerService.getTrainerByUsername(username);
     }
 
     public Training createTraining(TrainingDTO dto) {
         return trainingService.createTraining(dto);
     }
 
-    public Optional<Training> getTraining(Long id) {
-        return trainingService.getTrainingById(id);
+    public Training getTraining(String name) {
+        return trainingService.getTrainingByTrainingName(name);
     }
 }
