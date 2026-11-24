@@ -9,6 +9,8 @@ import com.epam.gym_crm.utils.CredentialsGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.NoSuchElementException;
+
 @Service
 public class TraineeService {
 
@@ -35,7 +37,7 @@ public class TraineeService {
         newTrainee.setLastName(lastName);
         newTrainee.setUsername(credentialsGenerator.generateUsername(firstName, lastName, traineeRepository::existsByUsername));
         newTrainee.setPassword(credentialsGenerator.generatePassword());
-        newTrainee.setActive(isActive);
+        newTrainee.setIsActive(isActive);
         newTrainee.setDateOfBirth(trainee.getDateOfBirth());
         newTrainee.setAddress(trainee.getAddress());
 
@@ -48,5 +50,22 @@ public class TraineeService {
         return isDeleted;
     }
 
+    public Trainee updateTrainee(Long id, TraineeDTO traineeDTO) {
+        Trainee trainee = traineeRepository.getTraineeById(id);
+        if (trainee == null || trainee.getUserId() == null || trainee.getFirstName() == null) {
+            throw new NoSuchElementException("Trainee not found: " + id);
+        }
 
+        trainee.setFirstName(traineeDTO.getFirstName());
+        trainee.setLastName(traineeDTO.getLastName());
+        trainee.setDateOfBirth(traineeDTO.getDateOfBirth());
+        trainee.setAddress(traineeDTO.getAddress());
+
+        return traineeRepository.saveTrainee(trainee);
+    }
+
+    public Trainee getTraineeById(Long id) {
+        Trainee trainee = traineeRepository.getTraineeById(id);
+        return trainee;
+    }
 }

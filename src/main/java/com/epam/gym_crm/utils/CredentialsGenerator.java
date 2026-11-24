@@ -1,7 +1,6 @@
 package com.epam.gym_crm.utils;
 
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
 import java.util.function.Predicate;
@@ -18,7 +17,6 @@ public class CredentialsGenerator {
 
     private static final SecureRandom RANDOM = new SecureRandom();
 
-    //Should it be static?
     public String generateUsername(String firstName, String lastName, Predicate<String> usernameExists) {
         String baseUsername = firstName.trim() + "." + lastName.trim();
 

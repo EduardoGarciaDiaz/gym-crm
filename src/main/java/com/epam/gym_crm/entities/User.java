@@ -1,7 +1,5 @@
 package com.epam.gym_crm.entities;
 
-import jakarta.validation.constraints.NotEmpty;
-
 public abstract class User {
     private String firstName;
     private String lastName;
@@ -52,11 +50,12 @@ public abstract class User {
         this.password = password;
     }
 
-    public boolean getActive() {
+    public boolean getIsActive() {
         return isActive;
     }
 
-    public void setActive(boolean active) {
+    public void setIsActive(boolean active) {
         isActive = active;
     }
+
 }

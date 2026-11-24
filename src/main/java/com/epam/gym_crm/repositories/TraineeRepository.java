@@ -11,16 +11,15 @@ import java.util.concurrent.atomic.AtomicLong;
 
 @Repository
 public class TraineeRepository {
-    private Map<Long, Trainee> trainees = new ConcurrentHashMap<>();
+    private Map<Long, Trainee> trainees;
 
     @Autowired
     public void setTrainees(@Qualifier("traineeStorage") Map<Long, Trainee> trainees) {
         this.trainees = trainees;
     }
 
-    private final AtomicLong idSequence = new AtomicLong(0);
 
-    public Trainee saveTrainee(Trainee trainee) {
+    public synchronized Trainee saveTrainee(Trainee trainee) {
         if (trainee.getUserId() == null) {
             trainee.setUserId(nextId());
         }
@@ -31,6 +30,15 @@ public class TraineeRepository {
 
     public boolean deleteTraineeById(Long id) {
         return trainees.remove(id) != null;
+    }
+
+    public Trainee getTraineeById(Long id) {
+        Trainee trainee = trainees.get(id);
+        if (trainee != null) {
+            return trainee;
+        } else {
+            return new Trainee();
+        }
     }
 
     public boolean existsByUsername(String username) {
