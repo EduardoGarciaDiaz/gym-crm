@@ -32,7 +32,7 @@ public class GymFacade {
     }
 
     public boolean deleteTrainee(Long traineeId) {
-        return traineeService.deleteTrainee(traineeId);
+        return traineeService.deleteTraineeByUsername(traineeId);
     }
 
     public Trainee updateTrainee(Long id, TraineeDTO dto) {
@@ -40,7 +40,7 @@ public class GymFacade {
     }
 
     public Optional<Trainee> getTrainee(Long id) {
-        return traineeService.getTraineeById(id);
+        return traineeService.getTraineeByUsername(id);
     }
 
     public Trainer createTrainer(TrainerDTO dto) {

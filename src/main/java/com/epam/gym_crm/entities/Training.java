@@ -1,22 +1,51 @@
 package com.epam.gym_crm.entities;
 
+import jakarta.persistence.*;
+
 import java.time.LocalDate;
 
+@Entity
+@Table(name = "Trainings")
 public class Training {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "ID")
     private Long id;
-    private Long traineeId;
-    private Long trainerId;
+
+    //@ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
+    @JoinColumn(
+            name = "trainee_id"
+    )
+    private Trainee trainee;
+
+    @ManyToOne
+    @JoinColumn(
+            name = "trainer_id"
+    )
+    private Trainer trainerId;
+
+    @Column(name = "TrainingName", length = 100, nullable = false)
     private String trainingName;
+
+    @ManyToOne
+    @JoinColumn(
+            name = "training_type_id"
+    )
     private TrainingType trainingType;
+
+    @Column(name = "TrainingDate", nullable = false)
     private LocalDate trainingDate;
+
+    @Column(name = "TrainingDuration", nullable = false)
     private int trainingDuration;
 
     public Training() {
     }
 
-    public Training(Long traineeId, Long trainerId, String trainingName,
+    public Training(Trainee traineeId, Trainer trainerId, String trainingName,
                     TrainingType trainingType, LocalDate trainingDate, int trainingDuration) {
-        this.traineeId = traineeId;
+        this.trainee = traineeId;
         this.trainerId = trainerId;
         this.trainingName = trainingName;
         this.trainingType = trainingType;
@@ -24,10 +53,10 @@ public class Training {
         this.trainingDuration = trainingDuration;
     }
 
-    public Training(Long id, Long traineeId, Long trainerId, String trainingName,
+    public Training(Long id, Trainee traineeId, Trainer trainerId, String trainingName,
                     TrainingType trainingType, LocalDate trainingDate, int trainingDuration) {
         this.id = id;
-        this.traineeId = traineeId;
+        this.trainee = traineeId;
         this.trainerId = trainerId;
         this.trainingName = trainingName;
         this.trainingType = trainingType;
@@ -35,24 +64,59 @@ public class Training {
         this.trainingDuration = trainingDuration;
     }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Long getId() {
+        return id;
+    }
 
-    public Long getTraineeId() { return traineeId; }
-    public void setTraineeId(Long traineeId) { this.traineeId = traineeId; }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public Long getTrainerId() { return trainerId; }
-    public void setTrainerId(Long trainerId) { this.trainerId = trainerId; }
+    public Trainee getTrainee() {
+        return trainee;
+    }
 
-    public String getTrainingName() { return trainingName; }
-    public void setTrainingName(String trainingName) { this.trainingName = trainingName; }
+    public void setTrainee(Trainee trainee) {
+        this.trainee = trainee;
+    }
 
-    public TrainingType getTrainingType() { return trainingType; }
-    public void setTrainingType(TrainingType trainingType) { this.trainingType = trainingType; }
+    public Trainer getTrainerId() {
+        return trainerId;
+    }
 
-    public LocalDate getTrainingDate() { return trainingDate; }
-    public void setTrainingDate(LocalDate trainingDate) { this.trainingDate = trainingDate; }
+    public void setTrainerId(Trainer trainerId) {
+        this.trainerId = trainerId;
+    }
 
-    public int getTrainingDuration() { return trainingDuration; }
-    public void setTrainingDuration(int trainingDuration) { this.trainingDuration = trainingDuration; }
+    public String getTrainingName() {
+        return trainingName;
+    }
+
+    public void setTrainingName(String trainingName) {
+        this.trainingName = trainingName;
+    }
+
+    public TrainingType getTrainingType() {
+        return trainingType;
+    }
+
+    public void setTrainingType(TrainingType trainingType) {
+        this.trainingType = trainingType;
+    }
+
+    public LocalDate getTrainingDate() {
+        return trainingDate;
+    }
+
+    public void setTrainingDate(LocalDate trainingDate) {
+        this.trainingDate = trainingDate;
+    }
+
+    public int getTrainingDuration() {
+        return trainingDuration;
+    }
+
+    public void setTrainingDuration(int trainingDuration) {
+        this.trainingDuration = trainingDuration;
+    }
 }

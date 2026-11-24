@@ -26,8 +26,8 @@ public class StorageConfig {
         return new ConcurrentHashMap<>();
     }
 
-    @Bean
-    public static StorageInitializer storageInitializer() {
-        return new StorageInitializer();
-    }
+//    @Bean
+//    public static StorageInitializer storageInitializer() {
+//        return new StorageInitializer();
+//    }
 }

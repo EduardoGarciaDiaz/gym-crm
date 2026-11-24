@@ -57,7 +57,7 @@ class GymFacadeTest {
 
     @Test
     void deleteTrainee_delegatesToTraineeService() {
-        when(traineeService.deleteTrainee(1L)).thenReturn(true);
+        when(traineeService.deleteTraineeByUsername(1L)).thenReturn(true);
 
         assertThat(facade.deleteTrainee(1L)).isTrue();
     }
@@ -65,7 +65,7 @@ class GymFacadeTest {
     @Test
     void getTrainee_delegatesToTraineeService() {
         Trainee trainee = new Trainee();
-        when(traineeService.getTraineeById(1L)).thenReturn(Optional.of(trainee));
+        when(traineeService.getTraineeByUsername(1L)).thenReturn(Optional.of(trainee));
 
         assertThat(facade.getTrainee(1L)).containsSame(trainee);
     }

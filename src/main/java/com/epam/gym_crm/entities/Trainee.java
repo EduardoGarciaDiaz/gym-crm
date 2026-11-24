@@ -1,21 +1,39 @@
 package com.epam.gym_crm.entities;
 
-import java.time.LocalDate;
+import jakarta.persistence.*;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@Table(name = "Trainees")
 public class Trainee extends User {
 
+//    @Id
+//    @GeneratedValue
+//    @Column(name = "ID")
+//    private Long id;
+    @Column(name = "DateOfBirth")
     private LocalDate dateOfBirth;
+
+    @Column(name = "Address", length = 150)
     private String address;
-    private Long userId;
+
+    @OneToMany(
+            mappedBy = "trainee",
+            cascade = CascadeType.REMOVE,
+            orphanRemoval = true
+    )
+    private List<Training> trainings = new ArrayList<>();
 
     public Trainee() {
     }
 
-    public Trainee(String firstName, String lastName, String username, String password, Boolean isActive, LocalDate birthdate, String address, Long userId) {
+    public Trainee(String firstName, String lastName, String username, String password, boolean isActive, LocalDate birthdate, String address) {
         super(firstName, lastName, username, password, isActive);
         this.dateOfBirth = birthdate;
         this.address = address;
-        this.userId = userId;
     }
 
     public LocalDate getDateOfBirth() {
@@ -32,13 +50,5 @@ public class Trainee extends User {
 
     public void setAddress(String address) {
         this.address = address;
-    }
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
     }
 }

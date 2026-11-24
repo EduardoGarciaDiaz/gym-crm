@@ -57,13 +57,13 @@ class TraineeServiceTest {
         when(credentialsGenerator.generatePassword()).thenReturn("aB3dE5gH7j");
         when(traineeRepository.saveTrainee(any(Trainee.class))).thenAnswer(invocation -> {
             Trainee t = invocation.getArgument(0);
-            t.setUserId(7L);
+            t.setId(7L);
             return t;
         });
 
         Trainee result = service.createTrainee(dto("John", "Smith"));
 
-        assertThat(result.getUserId()).isEqualTo(7L);
+        assertThat(result.getId()).isEqualTo(7L);
         assertThat(result.getFirstName()).isEqualTo("John");
         assertThat(result.getLastName()).isEqualTo("Smith");
         assertThat(result.getUsername()).isEqualTo("John.Smith1");
@@ -99,7 +99,7 @@ class TraineeServiceTest {
         // el username y el password se asignan solo al crear
         assertThat(result.getUsername()).isEqualTo("John.Smith");
         assertThat(result.getPassword()).isEqualTo("pw12345678");
-        assertThat(result.getUserId()).isEqualTo(1L);
+        assertThat(result.getId()).isEqualTo(1L);
         verify(traineeRepository).saveTrainee(existing);
     }
 
@@ -120,14 +120,14 @@ class TraineeServiceTest {
     void deleteTrainee_existingId_returnsTrue() {
         when(traineeRepository.deleteTraineeById(1L)).thenReturn(true);
 
-        assertThat(service.deleteTrainee(1L)).isTrue();
+        assertThat(service.deleteTraineeByUsername(1L)).isTrue();
     }
 
     @Test
     void deleteTrainee_unknownId_returnsFalse() {
         when(traineeRepository.deleteTraineeById(99L)).thenReturn(false);
 
-        assertThat(service.deleteTrainee(99L)).isFalse();
+        assertThat(service.deleteTraineeByUsername(99L)).isFalse();
     }
 
     // ---------- select ----------
@@ -135,16 +135,16 @@ class TraineeServiceTest {
     @Test
     void getTraineeById_existingId_returnsTrainee() {
         Trainee existing = new Trainee();
-        existing.setUserId(1L);
+        existing.setId(1L);
         when(traineeRepository.findTraineeById(1L)).thenReturn(Optional.of(existing));
 
-        assertThat(service.getTraineeById(1L)).containsSame(existing);
+        assertThat(service.getTraineeByUsername(1L)).containsSame(existing);
     }
 
     @Test
     void getTraineeById_unknownId_returnsEmpty() {
         when(traineeRepository.findTraineeById(99L)).thenReturn(Optional.empty());
 
-        assertThat(service.getTraineeById(99L)).isEmpty();
+        assertThat(service.getTraineeByUsername(99L)).isEmpty();
     }
 }

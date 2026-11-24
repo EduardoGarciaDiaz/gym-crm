@@ -3,6 +3,8 @@ package com.epam.gym_crm.services;
 import com.epam.gym_crm.dtos.TrainerDTO;
 import com.epam.gym_crm.entities.Trainer;
 import com.epam.gym_crm.entities.TrainingType;
+import com.epam.gym_crm.mappers.TrainerMapper;
+import com.epam.gym_crm.repositories.ITrainerRepository;
 import com.epam.gym_crm.repositories.TrainerRepository;
 import com.epam.gym_crm.utils.CredentialsGenerator;
 import org.slf4j.Logger;
@@ -18,11 +20,12 @@ public class TrainerService {
 
     private static final Logger log = LoggerFactory.getLogger(TrainerService.class);
 
-    private TrainerRepository trainerRepository;
+    private ITrainerRepository trainerRepository;
     private CredentialsGenerator credentialsGenerator;
+    private TrainerMapper trainerMapper;
 
     @Autowired
-    public void setTrainerRepository(TrainerRepository trainerRepository) {
+    public void setTrainerRepository(ITrainerRepository trainerRepository) {
         this.trainerRepository = trainerRepository;
     }
 
@@ -31,51 +34,59 @@ public class TrainerService {
         this.credentialsGenerator = credentialsGenerator;
     }
 
-    public Trainer createTrainer(TrainerDTO trainer) {
-        String firstName = trainer.getFirstName();
-        String lastName = trainer.getLastName();
-        boolean isActive = true;
-        log.info("Creating trainer {} {} with specialization {}", firstName, lastName, trainer.getSpecialization());
-        TrainingType trainingType = new TrainingType(trainer.getSpecialization());
+    @Autowired
+    public void setTrainerMapper(TrainerMapper trainerMapper) {
+        this.trainerMapper = trainerMapper;
+    }
 
-        Trainer newTrainer = new Trainer();
-        newTrainer.setFirstName(firstName);
-        newTrainer.setLastName(lastName);
-        newTrainer.setUsername(credentialsGenerator.generateUsername(firstName, lastName, trainerRepository::existsByUsername));
+    public Trainer createTrainer(TrainerDTO trainerDTO) {
+        String firstName = trainerDTO.getFirstName();
+        String lastName = trainerDTO.getLastName();
+        String username = credentialsGenerator.generateUsername(firstName, lastName, trainerRepository::existsByUsername);
+        Trainer newTrainer = trainerMapper.dtoToTrainer(trainerDTO);
+
+        newTrainer.setUsername(username);
         newTrainer.setPassword(credentialsGenerator.generatePassword());
-        newTrainer.setIsActive(isActive);
-        newTrainer.setSpecialization(trainingType);
-        log.debug("Credentials generated for trainer, username={}", newTrainer.getUsername());
+        newTrainer.setIsActive(true);
 
-        newTrainer = trainerRepository.saveTrainer(newTrainer);
-        log.info("Trainer created with id={} and username={}", newTrainer.getUserId(), newTrainer.getUsername());
+        newTrainer = trainerRepository.save(newTrainer);
+        log.info("Trainer created with id={} and username={}", newTrainer.getId(), newTrainer.getUsername());
         return newTrainer;
     }
 
     public Trainer updateTrainer(Long id, TrainerDTO trainerDTO) {
         log.info("Updating trainer with id={}", id);
-        Trainer trainer = trainerRepository.findTrainerById(id)
+        Trainer trainer = trainerRepository.findById(id)
                 .orElseThrow(() -> {
                     log.warn("Cannot update: trainer with id={} not found", id);
                     return new NoSuchElementException("Trainer not found: " + id);
                 });
 
-        trainer.setFirstName(trainerDTO.getFirstName());
-        trainer.setLastName(trainerDTO.getLastName());
-        trainer.setSpecialization(new TrainingType(trainerDTO.getSpecialization()));
+        trainerMapper.updateTrainerFromDTO(trainerDTO, trainer);
 
-        Trainer updated = trainerRepository.saveTrainer(trainer);
+        Trainer updated = trainerRepository.save(trainer);
         log.info("Trainer with id={} updated", id);
         return updated;
     }
 
-    public Optional<Trainer> getTrainerById(Long id) {
-        log.debug("Looking up trainer with id={}", id);
-        Optional<Trainer> trainer = trainerRepository.findTrainerById(id);
+    public Trainer getTrainerByUsername(String username) {
+        log.debug("Looking up trainer with username={}", username);
+        Trainer trainer = trainerRepository.findByUsernameIgnoreCase(username);
 
-        if (trainer.isEmpty()) {
-            log.debug("Trainer with id={} not found", id);
+        if (trainer == null) {
+            log.debug("Trainer with username={} not found", username);
         }
+
         return trainer;
+    }
+
+    //TODO:
+    public boolean changePassword(String oldPassword, String newPassword) {
+        return true;
+    }
+
+    //TODO:
+    public boolean changeTraineeStatus() {
+        return true;
     }
 }

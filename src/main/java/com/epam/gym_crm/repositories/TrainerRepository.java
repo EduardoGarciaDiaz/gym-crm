@@ -18,11 +18,11 @@ public class TrainerRepository {
     }
 
     public synchronized Trainer saveTrainer(Trainer trainer) {
-        if (trainer.getUserId() == null) {
-            trainer.setUserId(nextId());
+        if (trainer.getId() == null) {
+            trainer.setId(nextId());
         }
 
-        trainers.put(trainer.getUserId(), trainer);
+        trainers.put(trainer.getId(), trainer);
         return trainer;
     }
 

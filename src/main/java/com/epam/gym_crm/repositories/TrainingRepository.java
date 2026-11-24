@@ -11,34 +11,33 @@ import java.util.Optional;
 
 @Repository
 public class TrainingRepository {
-    private Map<Long, Training> trainings;
+    private ITrainingRepository trainingRepository;
 
+    @Autowired
+    public void setTrainingRepository(ITrainingRepository trainingRepository) {
+        this.trainingRepository = trainingRepository;
+    }
+    //private Map<Long, Training> trainings;
+/*
     @Autowired
     public void setTrainings(@Qualifier("trainingStorage") Map<Long, Training> trainings) {
         this.trainings = trainings;
     }
+ */
 
+    //TODO: Verify if it should receive a Training or a TrainingDTO
     public synchronized Training saveTraining(Training training) {
-        if (training.getId() == null) {
-            training.setId(nextId());
-        }
+        Training newTraining = trainingRepository.save(training);
 
-        trainings.put(training.getId(), training);
-        return training;
+        return newTraining;
     }
 
+    //TODO: Find by name
     public Optional<Training> findTrainingById(Long id) {
         if (id == null) {
             return Optional.empty();
         }
 
-        return Optional.ofNullable(trainings.get(id));
-    }
-
-    private long nextId() {
-        return trainings.keySet().stream()
-                .mapToLong(Long::longValue)
-                .max()
-                .orElse(0L) + 1;
+        return trainingRepository.findById(id);
     }
 }

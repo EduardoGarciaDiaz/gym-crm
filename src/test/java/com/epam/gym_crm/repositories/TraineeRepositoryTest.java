@@ -33,19 +33,19 @@ class TraineeRepositoryTest {
     void saveTrainee_emptyStorage_assignsIdOne() {
         Trainee saved = repository.saveTrainee(trainee("John.Smith"));
 
-        assertThat(saved.getUserId()).isEqualTo(1L);
+        assertThat(saved.getId()).isEqualTo(1L);
         assertThat(storage).containsEntry(1L, saved);
     }
 
     @Test
     void saveTrainee_continuesAfterHighestExistingId() {
         Trainee seeded = trainee("Seeded.User");
-        seeded.setUserId(5L);
+        seeded.setId(5L);
         storage.put(5L, seeded);
 
         Trainee saved = repository.saveTrainee(trainee("John.Smith"));
 
-        assertThat(saved.getUserId()).isEqualTo(6L);
+        assertThat(saved.getId()).isEqualTo(6L);
         assertThat(storage).hasSize(2);
     }
 
@@ -54,7 +54,7 @@ class TraineeRepositoryTest {
         Trainee first = repository.saveTrainee(trainee("John.Smith"));
         Trainee second = repository.saveTrainee(trainee("John.Smith1"));
 
-        assertThat(second.getUserId()).isNotEqualTo(first.getUserId());
+        assertThat(second.getId()).isNotEqualTo(first.getId());
         assertThat(storage).hasSize(2);
     }
 
@@ -66,14 +66,14 @@ class TraineeRepositoryTest {
         repository.saveTrainee(saved);
 
         assertThat(storage).hasSize(1);
-        assertThat(storage.get(saved.getUserId()).getAddress()).isEqualTo("New address");
+        assertThat(storage.get(saved.getId()).getAddress()).isEqualTo("New address");
     }
 
     @Test
     void findTraineeById_existingId_returnsTrainee() {
         Trainee saved = repository.saveTrainee(trainee("John.Smith"));
 
-        assertThat(repository.findTraineeById(saved.getUserId())).containsSame(saved);
+        assertThat(repository.findTraineeById(saved.getId())).containsSame(saved);
     }
 
     @Test
@@ -90,7 +90,7 @@ class TraineeRepositoryTest {
     void deleteTraineeById_existingId_removesAndReturnsTrue() {
         Trainee saved = repository.saveTrainee(trainee("John.Smith"));
 
-        assertThat(repository.deleteTraineeById(saved.getUserId())).isTrue();
+        assertThat(repository.deleteTraineeById(saved.getId())).isTrue();
         assertThat(storage).isEmpty();
     }
 

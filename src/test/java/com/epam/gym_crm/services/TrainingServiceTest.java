@@ -51,7 +51,7 @@ class TrainingServiceTest {
         Training result = service.createTraining(dto);
 
         assertThat(result.getId()).isEqualTo(3L);
-        assertThat(result.getTraineeId()).isEqualTo(1L);
+        assertThat(result.getTrainee()).isEqualTo(1L);
         assertThat(result.getTrainerId()).isEqualTo(2L);
         assertThat(result.getTrainingName()).isEqualTo("Morning Yoga");
         assertThat(result.getTrainingType().getName()).isEqualTo("Yoga");
