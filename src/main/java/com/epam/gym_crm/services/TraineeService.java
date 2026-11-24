@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @Service
 public class TraineeService {
@@ -51,10 +52,10 @@ public class TraineeService {
     }
 
     public Trainee updateTrainee(Long id, TraineeDTO traineeDTO) {
-        Trainee trainee = traineeRepository.getTraineeById(id);
-        if (trainee == null || trainee.getUserId() == null || trainee.getFirstName() == null) {
-            throw new NoSuchElementException("Trainee not found: " + id);
-        }
+        Trainee trainee = traineeRepository.findTraineeById(id)
+                .orElseThrow(() -> {
+                    return new NoSuchElementException("Trainee not found: " + id);
+                });
 
         trainee.setFirstName(traineeDTO.getFirstName());
         trainee.setLastName(traineeDTO.getLastName());
@@ -64,8 +65,7 @@ public class TraineeService {
         return traineeRepository.saveTrainee(trainee);
     }
 
-    public Trainee getTraineeById(Long id) {
-        Trainee trainee = traineeRepository.getTraineeById(id);
-        return trainee;
+    public Optional<Trainee> getTraineeById(Long id) {
+        return traineeRepository.findTraineeById(id);
     }
 }

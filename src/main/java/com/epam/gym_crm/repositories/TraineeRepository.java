@@ -6,8 +6,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
 
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.Optional;
 
 @Repository
 public class TraineeRepository {
@@ -17,7 +16,6 @@ public class TraineeRepository {
     public void setTrainees(@Qualifier("traineeStorage") Map<Long, Trainee> trainees) {
         this.trainees = trainees;
     }
-
 
     public synchronized Trainee saveTrainee(Trainee trainee) {
         if (trainee.getUserId() == null) {
@@ -29,16 +27,19 @@ public class TraineeRepository {
     }
 
     public boolean deleteTraineeById(Long id) {
-        return trainees.remove(id) != null;
+        if (id != null && id > 0) {
+            return trainees.remove(id) != null;
+        } else {
+            return false;
+        }
     }
 
-    public Trainee getTraineeById(Long id) {
-        Trainee trainee = trainees.get(id);
-        if (trainee != null) {
-            return trainee;
-        } else {
-            return new Trainee();
+    public Optional<Trainee> findTraineeById(Long id) {
+        if (id == null) {
+            return Optional.empty();
         }
+
+        return Optional.ofNullable(trainees.get(id));
     }
 
     public boolean existsByUsername(String username) {

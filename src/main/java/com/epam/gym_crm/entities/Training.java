@@ -14,6 +14,16 @@ public class Training {
     public Training() {
     }
 
+    public Training(Long traineeId, Long trainerId, String trainingName,
+                    TrainingType trainingType, LocalDate trainingDate, int trainingDuration) {
+        this.traineeId = traineeId;
+        this.trainerId = trainerId;
+        this.trainingName = trainingName;
+        this.trainingType = trainingType;
+        this.trainingDate = trainingDate;
+        this.trainingDuration = trainingDuration;
+    }
+
     public Training(Long id, Long traineeId, Long trainerId, String trainingName,
                     TrainingType trainingType, LocalDate trainingDate, int trainingDuration) {
         this.id = id;

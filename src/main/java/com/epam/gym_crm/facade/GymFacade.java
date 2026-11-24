@@ -1,11 +1,17 @@
 package com.epam.gym_crm.facade;
 
 import com.epam.gym_crm.dtos.TraineeDTO;
+import com.epam.gym_crm.dtos.TrainerDTO;
+import com.epam.gym_crm.dtos.TrainingDTO;
 import com.epam.gym_crm.entities.Trainee;
+import com.epam.gym_crm.entities.Trainer;
+import com.epam.gym_crm.entities.Training;
 import com.epam.gym_crm.services.TraineeService;
 import com.epam.gym_crm.services.TrainerService;
 import com.epam.gym_crm.services.TrainingService;
 import org.springframework.stereotype.Component;
+
+import java.util.Optional;
 
 @Component
 public class GymFacade {
@@ -33,7 +39,27 @@ public class GymFacade {
         return traineeService.updateTrainee(id, dto);
     }
 
-    public Trainee getTrainee(Long id) {
+    public Optional<Trainee> getTrainee(Long id) {
         return traineeService.getTraineeById(id);
+    }
+
+    public Trainer createTrainer(TrainerDTO dto) {
+        return trainerService.createTrainer(dto);
+    }
+
+    public Trainer updateTrainer(Long id, TrainerDTO dto) {
+        return trainerService.updateTrainer(id, dto);
+    }
+
+    public Optional<Trainer> getTrainer(Long id) {
+        return trainerService.getTrainerById(id);
+    }
+
+    public Training createTraining(TrainingDTO dto) {
+        return trainingService.createTraining(dto);
+    }
+
+    public Training getTraining(Long id) {
+        trainingService.getTrainingById(id);
     }
 }
