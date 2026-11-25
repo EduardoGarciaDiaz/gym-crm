@@ -23,7 +23,7 @@ public class Training {
     @JoinColumn(
             name = "trainer_id"
     )
-    private Trainer trainerId;
+    private Trainer trainer;
 
     @Column(name = "TrainingName", length = 100, nullable = false)
     private String trainingName;
@@ -46,7 +46,7 @@ public class Training {
     public Training(Trainee traineeId, Trainer trainerId, String trainingName,
                     TrainingType trainingType, LocalDate trainingDate, int trainingDuration) {
         this.trainee = traineeId;
-        this.trainerId = trainerId;
+        this.trainer = trainerId;
         this.trainingName = trainingName;
         this.trainingType = trainingType;
         this.trainingDate = trainingDate;
@@ -57,7 +57,7 @@ public class Training {
                     TrainingType trainingType, LocalDate trainingDate, int trainingDuration) {
         this.id = id;
         this.trainee = traineeId;
-        this.trainerId = trainerId;
+        this.trainer = trainerId;
         this.trainingName = trainingName;
         this.trainingType = trainingType;
         this.trainingDate = trainingDate;
@@ -80,12 +80,12 @@ public class Training {
         this.trainee = trainee;
     }
 
-    public Trainer getTrainerId() {
-        return trainerId;
+    public Trainer getTrainer() {
+        return trainer;
     }
 
-    public void setTrainerId(Trainer trainerId) {
-        this.trainerId = trainerId;
+    public void setTrainer(Trainer trainer) {
+        this.trainer = trainer;
     }
 
     public String getTrainingName() {

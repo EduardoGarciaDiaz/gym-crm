@@ -5,58 +5,74 @@ import com.epam.gym_crm.entities.Trainee;
 import com.epam.gym_crm.entities.Trainer;
 import com.epam.gym_crm.entities.Training;
 import com.epam.gym_crm.entities.TrainingType;
+import com.epam.gym_crm.repositories.ITraineeRepository;
+import com.epam.gym_crm.repositories.ITrainerRepository;
 import com.epam.gym_crm.repositories.ITrainingRepository;
-import com.epam.gym_crm.repositories.TrainingRepository;
+import com.epam.gym_crm.repositories.ITrainingTypeRepository;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 
-import java.util.Optional;
+import java.util.NoSuchElementException;
 
 @Service
+@Validated
+@Transactional
 public class TrainingService {
 
     private static final Logger log = LoggerFactory.getLogger(TrainingService.class);
 
     private ITrainingRepository trainingRepository;
+    private ITraineeRepository traineeRepository;
+    private ITrainerRepository trainerRepository;
+    private ITrainingTypeRepository trainingTypeRepository;
 
     @Autowired
     public void setTrainingRepository(ITrainingRepository trainingRepository) {
         this.trainingRepository = trainingRepository;
     }
 
-    public Training createTraining(TrainingDTO trainingDTO) {
+    @Autowired
+    public void setTraineeRepository(ITraineeRepository traineeRepository) {
+        this.traineeRepository = traineeRepository;
+    }
+
+    @Autowired
+    public void setTrainerRepository(ITrainerRepository trainerRepository) {
+        this.trainerRepository = trainerRepository;
+    }
+
+    @Autowired
+    public void setTrainingTypeRepository(ITrainingTypeRepository trainingTypeRepository) {
+        this.trainingTypeRepository = trainingTypeRepository;
+    }
+
+    public Training createTraining(@NotNull @Valid TrainingDTO trainingDTO) {
         log.info("Creating training '{}' for traineeId={} with trainerId={}",
                 trainingDTO.getTrainingName(), trainingDTO.getTraineeId(), trainingDTO.getTrainerId());
 
-        TrainingType trainingType = new TrainingType(trainingDTO.getTrainingType());
-        Trainee trainee = new Trainee();
-        trainee.setId(trainingDTO.getTraineeId());
-        Trainer trainer = new Trainer();
-        trainer.setId(trainingDTO.getTrainerId());
-
+        Trainee trainee = traineeRepository.findById(trainingDTO.getTraineeId())
+                .orElseThrow(() -> new NoSuchElementException("Trainee not found: " + trainingDTO.getTraineeId()));
+        Trainer trainer = trainerRepository.findById(trainingDTO.getTrainerId())
+                .orElseThrow(() -> new NoSuchElementException("Trainer not found: " + trainingDTO.getTrainerId()));
+        TrainingType type = trainingTypeRepository.findByNameIgnoreCase(trainingDTO.getTrainingType())
+                .orElseThrow(() -> new NoSuchElementException("Training type not found: " + trainingDTO.getTrainingType()));
 
         Training newTraining = new Training();
         newTraining.setTrainee(trainee);
-        newTraining.setTrainerId(trainer);
+        newTraining.setTrainer(trainer);
         newTraining.setTrainingName(trainingDTO.getTrainingName());
-        newTraining.setTrainingType(trainingType);
+        newTraining.setTrainingType(type);
         newTraining.setTrainingDate(trainingDTO.getTrainingDate());
         newTraining.setTrainingDuration(trainingDTO.getTrainingDuration());
 
         newTraining = trainingRepository.save(newTraining);
         log.info("Training created with id={}", newTraining.getId());
         return newTraining;
-    }
-
-    public Training getTrainingByTrainingName(String name) {
-        log.debug("Looking up training with username={}", name);
-        Training training = trainingRepository.findByTrainingNameIgnoreCase(name);
-
-        if (training == null) {
-            log.debug("Training with name={} not found", name);
-        }
-        return training;
     }
 }

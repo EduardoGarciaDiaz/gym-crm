@@ -14,11 +14,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
+@Validated
+@Transactional
 public class TraineeService {
 
     private static final Logger log = LoggerFactory.getLogger(TraineeService.class);
@@ -34,7 +37,7 @@ public class TraineeService {
     }
 
     @Autowired
-    public void setTraineeRepository(IUserRepository userRepository) {
+    public void setUserRepository(IUserRepository userRepository) {
         this.userRepository = userRepository;
     }
 

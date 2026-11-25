@@ -7,7 +7,6 @@ import com.epam.gym_crm.mappers.TrainerMapper;
 import com.epam.gym_crm.repositories.ITrainerRepository;
 import com.epam.gym_crm.repositories.ITrainingTypeRepository;
 import com.epam.gym_crm.repositories.IUserRepository;
-import com.epam.gym_crm.repositories.TrainerRepository;
 import com.epam.gym_crm.utils.CredentialsGenerator;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -17,11 +16,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
+@Validated
+@Transactional
 public class TrainerService {
 
     private static final Logger log = LoggerFactory.getLogger(TrainerService.class);
@@ -38,7 +40,7 @@ public class TrainerService {
     }
 
     @Autowired
-    public void setTraineeRepository(IUserRepository userRepository) {
+    public void setUserRepository(IUserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
