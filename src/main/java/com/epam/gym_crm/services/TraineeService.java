@@ -84,19 +84,15 @@ public class TraineeService {
         return false;
     }
 
-    public Trainee updateTrainee(Long id,@NotNull @Valid TraineeDTO traineeDTO) {
-        log.info("Updating trainee with id={}", id);
+    public Trainee updateTrainee(@NotBlank String username, @NotNull @Valid TraineeDTO traineeDTO) {
+        log.info("Updating trainee {}", username);
 
-        Trainee trainee = traineeRepository.findById(id)
-                .orElseThrow(() -> {
-                    log.warn("Cannot update: trainee with id={} not found", id);
-                    return new NoSuchElementException("Trainee not found: " + id);
-                });
+        Trainee trainee = findOrThrow(username);
 
         traineeMapper.updateTraineeFromDTO(traineeDTO, trainee);
 
         Trainee updated = traineeRepository.save(trainee);
-        log.info("Trainee with id={} updated", id);
+        log.info("Trainee {} updated", username);
         return updated;
     }
 

@@ -77,13 +77,9 @@ public class TrainerService {
         return newTrainer;
     }
 
-    public Trainer updateTrainer(Long id,@NotNull @Valid TrainerDTO trainerDTO) {
-        log.info("Updating trainer with id={}", id);
-        Trainer trainer = trainerRepository.findById(id)
-                .orElseThrow(() -> {
-                    log.warn("Cannot update: trainer with id={} not found", id);
-                    return new NoSuchElementException("Trainer not found: " + id);
-                });
+    public Trainer updateTrainer(@NotBlank String username, @NotNull @Valid TrainerDTO trainerDTO) {
+        log.info("Updating trainer {}", username);
+        Trainer trainer = findOrThrow(username);
 
         TrainingType type = trainingTypeRepository.findByNameIgnoreCase(trainerDTO.getSpecialization())
                 .orElseThrow(() -> new NoSuchElementException("Training type not found: " + trainerDTO.getSpecialization()));
@@ -92,7 +88,7 @@ public class TrainerService {
         trainerMapper.updateTrainerFromDTO(trainerDTO, trainer);
 
         Trainer updated = trainerRepository.save(trainer);
-        log.info("Trainer with id={} updated", id);
+        log.info("Trainer {} updated", username);
         return updated;
     }
 

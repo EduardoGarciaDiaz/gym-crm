@@ -25,50 +25,72 @@ public class DemoRunner implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
+        // --- Creación (no requiere credenciales) ---
         Trainer ana = check("01 crear trainer Ana Torres (Yoga)",
                 () -> facade.createTrainer(trainer("Ana", "Torres", "Yoga")));
         check("02 crear trainer homónimo -> Ana.Torres1",
-                () -> facade.createTrainer(trainer("Ana", "Torres", "Zumba")));
-        check("03 crear trainer con tipo inexistente -> error esperado",
-                () -> facade.createTrainer(trainer("Luis", "Pena", "Ajedrez")));
-
-        Trainee john = check("04 crear trainee SIN fecha ni dirección (opcionales)",
+                () -> facade.createTrainer(trainer("Ana", "Torres", "Yoga")));
+        check("03 crear trainer con tipo inexistente -> NoSuchElementException",
+                () -> facade.createTrainer(trainer("Luis", "Perez", "TipoQueNoExiste")));
+        Trainee john = check("04 crear trainee SIN fecha ni dirección",
                 () -> facade.createTrainee(trainee("John", "Smith", null, null)));
-        check("05 trainee con el nombre de un trainer -> Ana.Torres2",
-                () -> facade.createTrainee(trainee("Ana", "Torres", LocalDate.of(1998, 5, 1), "Calle 1")));
-
-        check("06 buscar trainee existente", () -> facade.getTrainee("John.Smith").orElseThrow());
-        check("07 buscar trainee inexistente -> false", () -> facade.getTrainee("No.Existe").isPresent());
-        check("08 buscar trainer existente", () -> facade.getTrainer("Ana.Torres").orElseThrow());
-
-        if (john != null) {
-            check("09 actualizar trainee", () -> facade.updateTrainee(john.getId(),
-                    trainee("Johnny", "Smith", LocalDate.of(1995, 3, 12), "Av. Reforma 12")));
-        }
-        if (john != null && ana != null) {
-            check("10 crear training", () -> facade.createTraining(new TrainingDTO(
-                    john.getId(), ana.getId(), "Morning Yoga", "Yoga", LocalDate.of(2026, 11, 20), 60)));
-            check("11 crear training con trainee inexistente -> error esperado",
-                    () -> facade.createTraining(new TrainingDTO(
-                            9999L, ana.getId(), "Fantasma", "Yoga", LocalDate.of(2026, 11, 20), 30)));
-        }
-        check("14 trainee con nombre vacío -> error de validación",
-                () -> facade.createTrainee(trainee("", "Smith", null, null)));
-
-        if (john != null) {
-            String user = john.getUsername();
-            check("15 desactivar trainee -> false", () -> facade.toggleTraineeStatus(user));
-            check("16 reactivar trainee -> true", () -> facade.toggleTraineeStatus(user));
-            check("17 cambiar contraseña con la actual incorrecta -> false",
-                    () -> facade.changeTraineePassword(user, "incorrecta", "NuevaClave123"));
-            check("18 cambiar contraseña con la actual correcta -> true",
-                    () -> facade.changeTraineePassword(user, john.getPassword(), "NuevaClave123"));
-            check("19 estado de usuario inexistente -> error",
-                    () -> facade.toggleTraineeStatus("No.Existe"));
+        check("05 trainee con nombre de trainer -> Ana.Torres2",
+                () -> facade.createTrainee(trainee("Ana", "Torres", LocalDate.of(1995, 3, 12), "Av. Reforma 12")));
+        check("06 trainee con nombre vacío -> ConstraintViolationException",
+                () -> facade.createTrainee(trainee("", "Lopez", null, null)));
+        if (ana == null || john == null) {
+            log.error("No se pudieron crear los datos base; se detiene el escenario.");
+            return;
         }
 
-        check("12 borrar trainee (y sus trainings en cascada)", () -> facade.deleteTrainee("John.Smith"));
-        check("13 borrar trainee inexistente -> false", () -> facade.deleteTrainee("No.Existe"));
+        Credentials johnAuth = new Credentials(john.getUsername(), john.getPassword());
+        Credentials anaAuth = new Credentials(ana.getUsername(), ana.getPassword());
+
+        // --- Autenticación (req. 3 y 4) ---
+        check("07 match trainee con credenciales correctas -> true", () -> facade.matchTraineeCredentials(johnAuth));
+        check("08 match trainee con contraseña incorrecta -> false",
+                () -> facade.matchTraineeCredentials(new Credentials(john.getUsername(), "incorrecta")));
+        check("09 match trainer con credenciales correctas -> true", () -> facade.matchTrainerCredentials(anaAuth));
+        check("10 match trainer con credenciales de trainee -> false", () -> facade.matchTrainerCredentials(johnAuth));
+        check("11 getTrainee con credenciales correctas", () -> facade.getTrainee(johnAuth, john.getUsername()).orElseThrow());
+        check("12 getTrainee con credenciales nulas -> AuthenticationException", () -> facade.getTrainee(null, john.getUsername()));
+        check("13 getTrainee con usuario inexistente -> AuthenticationException",
+                () -> facade.getTrainee(new Credentials("No.Existe", "x"), john.getUsername()));
+        check("14 getTrainee con credenciales de trainer -> AuthenticationException",
+                () -> facade.getTrainee(anaAuth, john.getUsername()));
+        check("15 getTrainer con credenciales de trainee -> AuthenticationException",
+                () -> facade.getTrainer(johnAuth, ana.getUsername()));
+
+        // --- Actualización y propiedad de la cuenta ---
+        check("16 actualizar mi propio trainee", () -> facade.updateTrainee(johnAuth, john.getUsername(),
+                trainee("John", "Smith", LocalDate.of(2000, 1, 15), "Calle Nueva 99")));
+        check("17 actualizar la cuenta de otro -> SecurityException", () -> facade.updateTrainee(johnAuth, "Ana.Torres2",
+                trainee("Hack", "Er", null, null)));
+        check("18 actualizar mi trainer", () -> facade.updateTrainer(anaAuth, ana.getUsername(),
+                trainer("Ana", "Torres", "Yoga")));
+
+        // --- Trainings ---
+        check("19 crear training como trainer", () -> facade.createTraining(anaAuth,
+                new TrainingDTO(john.getId(), ana.getId(), "Morning Yoga", "Yoga", LocalDate.of(2026, 12, 1), 60)));
+        check("20 crear training con trainee inexistente -> NoSuchElementException", () -> facade.createTraining(anaAuth,
+                new TrainingDTO(99999L, ana.getId(), "X", "Yoga", LocalDate.of(2026, 12, 1), 60)));
+        check("21 crear training con credenciales malas -> AuthenticationException", () -> facade.createTraining(
+                new Credentials(ana.getUsername(), "mala"),
+                new TrainingDTO(john.getId(), ana.getId(), "X", "Yoga", LocalDate.of(2026, 12, 1), 60)));
+
+        // --- Estado y contraseña ---
+        check("22 desactivar trainee -> false", () -> facade.toggleTraineeStatus(johnAuth));
+        check("23 reactivar trainee -> true", () -> facade.toggleTraineeStatus(johnAuth));
+        check("24 cambiar contraseña -> true", () -> facade.changeTraineePassword(johnAuth, "NuevaClave123"));
+        check("25 credenciales viejas ya no sirven -> AuthenticationException", () -> facade.toggleTraineeStatus(johnAuth));
+        Credentials johnNew = new Credentials(john.getUsername(), "NuevaClave123");
+        check("26 credenciales nuevas sí sirven", () -> facade.matchTraineeCredentials(johnNew));
+
+        // --- Borrado ---
+        check("27 borrar mi trainee (y sus trainings en cascada) -> true",
+                () -> facade.deleteTrainee(johnNew, john.getUsername()));
+        check("28 borrar de nuevo -> AuthenticationException (ya no existe)",
+                () -> facade.deleteTrainee(johnNew, john.getUsername()));
         log.info("Escenarios terminados. Verifica los datos con SQL.");
     }
 
