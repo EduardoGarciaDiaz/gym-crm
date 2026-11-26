@@ -13,6 +13,8 @@ import com.epam.gym_crm.services.TrainerService;
 import com.epam.gym_crm.services.TrainingService;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -71,6 +73,17 @@ public class GymFacade {
         return traineeService.toggleStatus(auth.username());
     }
 
+    public List<Trainer> getUnassignedTrainers(Credentials auth) {
+        authenticationService.authenticateTrainee(auth);
+        return traineeService.getUnassignedTrainers(auth.username());
+    }
+
+    public List<Training> getTraineeTrainings(Credentials auth, LocalDate from, LocalDate to,
+                                              String trainerName, String trainingType) {
+        authenticationService.authenticateTrainee(auth);
+        return trainingService.getTraineeTrainings(auth.username(), from, to, trainerName, trainingType);
+    }
+
     public Trainer createTrainer(TrainerDTO dto) {
         return trainerService.createTrainer(dto);
     }
@@ -94,6 +107,11 @@ public class GymFacade {
     public boolean toggleTrainerStatus(Credentials auth) {
         authenticationService.authenticateTrainer(auth);
         return trainerService.toggleStatus(auth.username());
+    }
+
+    public List<Training> getTrainerTrainings(Credentials auth, LocalDate from, LocalDate to, String traineeName) {
+        authenticationService.authenticateTrainer(auth);
+        return trainingService.getTrainerTrainings(auth.username(), from, to, traineeName);
     }
 
     public Training createTraining(Credentials auth, TrainingDTO dto) {

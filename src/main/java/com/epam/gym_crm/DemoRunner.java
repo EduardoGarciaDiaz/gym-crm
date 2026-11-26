@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.function.Supplier;
 
 @Component
@@ -86,10 +87,26 @@ public class DemoRunner implements CommandLineRunner {
         Credentials johnNew = new Credentials(john.getUsername(), "NuevaClave123");
         check("26 credenciales nuevas sí sirven", () -> facade.matchTraineeCredentials(johnNew));
 
+        // --- Trainers sin asignar (req. 17) ---
+        check("27 trainers sin asignar (activos sin ningún training con este trainee)",
+                () -> facade.getUnassignedTrainers(johnNew).stream().map(Trainer::getUsername).toList());
+        check("28 Ana.Torres NO debe aparecer: ya tiene un training con John.Smith",
+                () -> facade.getUnassignedTrainers(johnNew).stream().noneMatch(t -> t.getUsername().equals(ana.getUsername())));
+
+        // --- Consulta de trainings con criterios (req. 14 y 15) ---
+        check("31 trainings del trainee sin filtros -> 1",
+                () -> facade.getTraineeTrainings(johnNew, null, null, null, null).size());
+        check("32 trainings del trainee, tipo Yoga y trainer 'ana' -> 1",
+                () -> facade.getTraineeTrainings(johnNew, LocalDate.of(2026, 1, 1), LocalDate.of(2026, 12, 31), "ana", "yoga").size());
+        check("33 trainings del trainee con rango de fechas sin resultados -> 0",
+                () -> facade.getTraineeTrainings(johnNew, LocalDate.of(2020, 1, 1), LocalDate.of(2020, 12, 31), null, null).size());
+        check("34 trainings del trainer filtrando por nombre del trainee 'john' -> 1",
+                () -> facade.getTrainerTrainings(anaAuth, null, null, "john").size());
+
         // --- Borrado ---
-        check("27 borrar mi trainee (y sus trainings en cascada) -> true",
+        check("35 borrar mi trainee (y sus trainings en cascada) -> true",
                 () -> facade.deleteTrainee(johnNew, john.getUsername()));
-        check("28 borrar de nuevo -> AuthenticationException (ya no existe)",
+        check("36 borrar de nuevo -> AuthenticationException (ya no existe)",
                 () -> facade.deleteTrainee(johnNew, john.getUsername()));
         log.info("Escenarios terminados. Verifica los datos con SQL.");
     }

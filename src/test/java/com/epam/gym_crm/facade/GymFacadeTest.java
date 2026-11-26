@@ -18,6 +18,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -222,6 +224,47 @@ class GymFacadeTest {
                 .when(authenticationService).authenticateUser(ana);
 
         assertThatThrownBy(() -> facade.createTraining(ana, new TrainingDTO()))
+                .isInstanceOf(AuthenticationException.class);
+        verifyNoInteractions(trainingService);
+    }
+
+    // ---- req. 14, 15, 17, 18 ----
+
+    @Test
+    void getUnassignedTrainers_usesOwnUsername() {
+        List<Trainer> trainers = List.of(new Trainer());
+        when(traineeService.getUnassignedTrainers("John.Smith")).thenReturn(trainers);
+
+        assertThat(facade.getUnassignedTrainers(john)).isSameAs(trainers);
+        verify(authenticationService).authenticateTrainee(john);
+    }
+
+    @Test
+    void getTraineeTrainings_usesOwnUsernameAndPassesCriteria() {
+        LocalDate from = LocalDate.of(2026, 1, 1);
+        LocalDate to = LocalDate.of(2026, 12, 31);
+        List<Training> trainings = List.of(new Training());
+        when(trainingService.getTraineeTrainings("John.Smith", from, to, "ana", "Yoga")).thenReturn(trainings);
+
+        assertThat(facade.getTraineeTrainings(john, from, to, "ana", "Yoga")).isSameAs(trainings);
+        verify(authenticationService).authenticateTrainee(john);
+    }
+
+    @Test
+    void getTrainerTrainings_usesOwnUsernameAndPassesCriteria() {
+        List<Training> trainings = List.of(new Training());
+        when(trainingService.getTrainerTrainings("Ana.Torres", null, null, "john")).thenReturn(trainings);
+
+        assertThat(facade.getTrainerTrainings(ana, null, null, "john")).isSameAs(trainings);
+        verify(authenticationService).authenticateTrainer(ana);
+    }
+
+    @Test
+    void getTraineeTrainings_badCredentials_neverReachesService() {
+        doThrow(new AuthenticationException("Invalid username or password"))
+                .when(authenticationService).authenticateTrainee(john);
+
+        assertThatThrownBy(() -> facade.getTraineeTrainings(john, null, null, null, null))
                 .isInstanceOf(AuthenticationException.class);
         verifyNoInteractions(trainingService);
     }

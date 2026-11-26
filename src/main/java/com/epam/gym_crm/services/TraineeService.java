@@ -2,8 +2,10 @@ package com.epam.gym_crm.services;
 
 import com.epam.gym_crm.dtos.TraineeDTO;
 import com.epam.gym_crm.entities.Trainee;
+import com.epam.gym_crm.entities.Trainer;
 import com.epam.gym_crm.mappers.TraineeMapper;
 import com.epam.gym_crm.repositories.ITraineeRepository;
+import com.epam.gym_crm.repositories.ITrainerRepository;
 import com.epam.gym_crm.repositories.IUserRepository;
 import com.epam.gym_crm.utils.CredentialsGenerator;
 import jakarta.validation.Valid;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -27,6 +30,7 @@ public class TraineeService {
     private static final Logger log = LoggerFactory.getLogger(TraineeService.class);
 
     private ITraineeRepository traineeRepository;
+    private ITrainerRepository trainerRepository;
     private IUserRepository userRepository;
     private CredentialsGenerator credentialsGenerator;
     private TraineeMapper traineeMapper;
@@ -34,6 +38,11 @@ public class TraineeService {
     @Autowired
     public void setTraineeRepository(ITraineeRepository traineeRepository) {
         this.traineeRepository = traineeRepository;
+    }
+
+    @Autowired
+    public void setTrainerRepository(ITrainerRepository trainerRepository) {
+        this.trainerRepository = trainerRepository;
     }
 
     @Autowired
@@ -123,6 +132,14 @@ public class TraineeService {
         trainee.setIsActive(!trainee.getIsActive());
         log.info("Trainee {} is now {}", username, trainee.getIsActive() ? "active" : "inactive");
         return trainee.getIsActive();
+    }
+
+    @Transactional(readOnly = true)
+    public List<Trainer> getUnassignedTrainers(@NotBlank String username) {
+        findOrThrow(username);
+        List<Trainer> trainers = trainerRepository.findActiveNotAssignedToTrainee(username);
+        log.debug("Trainee {} has {} unassigned active trainers", username, trainers.size());
+        return trainers;
     }
 
     private Trainee findOrThrow(String username) {

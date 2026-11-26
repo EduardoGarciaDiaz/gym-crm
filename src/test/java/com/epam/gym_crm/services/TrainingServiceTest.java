@@ -14,8 +14,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -96,5 +99,46 @@ class TrainingServiceTest {
 
         assertThatThrownBy(() -> service.createTraining(dto)).isInstanceOf(NoSuchElementException.class);
         verify(trainingRepository, never()).save(any());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void getTraineeTrainings_existingTrainee_queriesRepositoryWithSpecification() {
+        Training training = new Training();
+        when(traineeRepository.existsByUsername("John.Smith")).thenReturn(true);
+        when(trainingRepository.findAll(any(Specification.class), any(Sort.class))).thenReturn(List.of(training));
+
+        List<Training> result = service.getTraineeTrainings("John.Smith", LocalDate.of(2026, 1, 1),
+                LocalDate.of(2026, 12, 31), "ana", "Yoga");
+
+        assertThat(result).containsExactly(training);
+        verify(trainingRepository).findAll(any(Specification.class), any(Sort.class));
+    }
+
+    @Test
+    void getTraineeTrainings_unknownTrainee_throwsWithoutQuerying() {
+        when(traineeRepository.existsByUsername("No.Existe")).thenReturn(false);
+
+        assertThatThrownBy(() -> service.getTraineeTrainings("No.Existe", null, null, null, null))
+                .isInstanceOf(NoSuchElementException.class);
+        verify(trainingRepository, never()).findAll(any(Specification.class), any(Sort.class));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void getTrainerTrainings_existingTrainer_queriesRepositoryWithSpecification() {
+        Training training = new Training();
+        when(trainerRepository.existsByUsername("Ana.Torres")).thenReturn(true);
+        when(trainingRepository.findAll(any(Specification.class), any(Sort.class))).thenReturn(List.of(training));
+
+        assertThat(service.getTrainerTrainings("Ana.Torres", null, null, "john")).containsExactly(training);
+    }
+
+    @Test
+    void getTrainerTrainings_unknownTrainer_throws() {
+        when(trainerRepository.existsByUsername("No.Existe")).thenReturn(false);
+
+        assertThatThrownBy(() -> service.getTrainerTrainings("No.Existe", null, null, null))
+                .isInstanceOf(NoSuchElementException.class);
     }
 }

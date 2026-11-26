@@ -2,8 +2,10 @@ package com.epam.gym_crm.services;
 
 import com.epam.gym_crm.dtos.TraineeDTO;
 import com.epam.gym_crm.entities.Trainee;
+import com.epam.gym_crm.entities.Trainer;
 import com.epam.gym_crm.mappers.TraineeMapper;
 import com.epam.gym_crm.repositories.ITraineeRepository;
+import com.epam.gym_crm.repositories.ITrainerRepository;
 import com.epam.gym_crm.repositories.IUserRepository;
 import com.epam.gym_crm.utils.CredentialsGenerator;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,6 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -28,6 +31,8 @@ class TraineeServiceTest {
     @Mock
     private ITraineeRepository traineeRepository;
     @Mock
+    private ITrainerRepository trainerRepository;
+    @Mock
     private IUserRepository userRepository;
     @Mock
     private CredentialsGenerator credentialsGenerator;
@@ -40,6 +45,7 @@ class TraineeServiceTest {
     void setUp() {
         service = new TraineeService();
         service.setTraineeRepository(traineeRepository);
+        service.setTrainerRepository(trainerRepository);
         service.setUserRepository(userRepository);
         service.setCredentialsGenerator(credentialsGenerator);
         service.setTraineeMapper(traineeMapper);
@@ -158,4 +164,29 @@ class TraineeServiceTest {
 
         assertThatThrownBy(() -> service.toggleStatus("No.Existe")).isInstanceOf(NoSuchElementException.class);
     }
+
+    private Trainer trainer(String username) {
+        Trainer t = new Trainer();
+        t.setUsername(username);
+        return t;
+    }
+
+    @Test
+    void getUnassignedTrainers_existingTrainee_returnsRepositoryResult() {
+        Trainer ana = trainer("Ana.Torres");
+        when(traineeRepository.findByUsername("John.Smith")).thenReturn(Optional.of(trainee("John.Smith", "pw", true)));
+        when(trainerRepository.findActiveNotAssignedToTrainee("John.Smith")).thenReturn(List.of(ana));
+
+        assertThat(service.getUnassignedTrainers("John.Smith")).containsExactly(ana);
+    }
+
+    @Test
+    void getUnassignedTrainers_unknownTrainee_throws() {
+        when(traineeRepository.findByUsername("No.Existe")).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.getUnassignedTrainers("No.Existe"))
+                .isInstanceOf(NoSuchElementException.class);
+        verify(trainerRepository, never()).findActiveNotAssignedToTrainee(any());
+    }
+
 }
