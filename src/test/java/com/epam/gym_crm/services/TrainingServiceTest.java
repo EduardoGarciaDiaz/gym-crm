@@ -1,5 +1,7 @@
 package com.epam.gym_crm.services;
 
+import com.epam.gym_crm.dtos.TraineeTrainingCriteria;
+import com.epam.gym_crm.dtos.TrainerTrainingCriteria;
 import com.epam.gym_crm.dtos.TrainingDTO;
 import com.epam.gym_crm.entities.Trainee;
 import com.epam.gym_crm.entities.Trainer;
@@ -108,8 +110,8 @@ class TrainingServiceTest {
         when(traineeRepository.existsByUsername("John.Smith")).thenReturn(true);
         when(trainingRepository.findAll(any(Specification.class), any(Sort.class))).thenReturn(List.of(training));
 
-        List<Training> result = service.getTraineeTrainings("John.Smith", LocalDate.of(2026, 1, 1),
-                LocalDate.of(2026, 12, 31), "ana", "Yoga");
+        List<Training> result = service.getTraineeTrainings("John.Smith", new TraineeTrainingCriteria(
+                LocalDate.of(2026, 1, 1), LocalDate.of(2026, 12, 31), "ana", "Yoga"));
 
         assertThat(result).containsExactly(training);
         verify(trainingRepository).findAll(any(Specification.class), any(Sort.class));
@@ -119,7 +121,7 @@ class TrainingServiceTest {
     void getTraineeTrainings_unknownTrainee_throwsWithoutQuerying() {
         when(traineeRepository.existsByUsername("No.Existe")).thenReturn(false);
 
-        assertThatThrownBy(() -> service.getTraineeTrainings("No.Existe", null, null, null, null))
+        assertThatThrownBy(() -> service.getTraineeTrainings("No.Existe", TraineeTrainingCriteria.none()))
                 .isInstanceOf(NoSuchElementException.class);
         verify(trainingRepository, never()).findAll(any(Specification.class), any(Sort.class));
     }
@@ -131,14 +133,14 @@ class TrainingServiceTest {
         when(trainerRepository.existsByUsername("Ana.Torres")).thenReturn(true);
         when(trainingRepository.findAll(any(Specification.class), any(Sort.class))).thenReturn(List.of(training));
 
-        assertThat(service.getTrainerTrainings("Ana.Torres", null, null, "john")).containsExactly(training);
+        assertThat(service.getTrainerTrainings("Ana.Torres", new TrainerTrainingCriteria(null, null, "john"))).containsExactly(training);
     }
 
     @Test
     void getTrainerTrainings_unknownTrainer_throws() {
         when(trainerRepository.existsByUsername("No.Existe")).thenReturn(false);
 
-        assertThatThrownBy(() -> service.getTrainerTrainings("No.Existe", null, null, null))
+        assertThatThrownBy(() -> service.getTrainerTrainings("No.Existe", TrainerTrainingCriteria.none()))
                 .isInstanceOf(NoSuchElementException.class);
     }
 }

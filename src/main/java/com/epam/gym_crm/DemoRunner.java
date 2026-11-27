@@ -95,13 +95,15 @@ public class DemoRunner implements CommandLineRunner {
 
         // --- Consulta de trainings con criterios (req. 14 y 15) ---
         check("31 trainings del trainee sin filtros -> 1",
-                () -> facade.getTraineeTrainings(johnNew, null, null, null, null).size());
+                () -> facade.getTraineeTrainings(johnNew, TraineeTrainingCriteria.none()).size());
         check("32 trainings del trainee, tipo Yoga y trainer 'ana' -> 1",
-                () -> facade.getTraineeTrainings(johnNew, LocalDate.of(2026, 1, 1), LocalDate.of(2026, 12, 31), "ana", "yoga").size());
+                () -> facade.getTraineeTrainings(johnNew, new TraineeTrainingCriteria(
+                        LocalDate.of(2026, 1, 1), LocalDate.of(2026, 12, 31), "ana", "yoga")).size());
         check("33 trainings del trainee con rango de fechas sin resultados -> 0",
-                () -> facade.getTraineeTrainings(johnNew, LocalDate.of(2020, 1, 1), LocalDate.of(2020, 12, 31), null, null).size());
+                () -> facade.getTraineeTrainings(johnNew, new TraineeTrainingCriteria(
+                        LocalDate.of(2020, 1, 1), LocalDate.of(2020, 12, 31), null, null)).size());
         check("34 trainings del trainer filtrando por nombre del trainee 'john' -> 1",
-                () -> facade.getTrainerTrainings(anaAuth, null, null, "john").size());
+                () -> facade.getTrainerTrainings(anaAuth, new TrainerTrainingCriteria(null, null, "john")).size());
 
         // --- Borrado ---
         check("35 borrar mi trainee (y sus trainings en cascada) -> true",

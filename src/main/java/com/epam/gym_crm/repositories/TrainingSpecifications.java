@@ -1,5 +1,7 @@
 package com.epam.gym_crm.repositories;
 
+import com.epam.gym_crm.dtos.TraineeTrainingCriteria;
+import com.epam.gym_crm.dtos.TrainerTrainingCriteria;
 import com.epam.gym_crm.entities.Training;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
@@ -14,35 +16,33 @@ public final class TrainingSpecifications {
     private TrainingSpecifications() {
     }
 
-    public static Specification<Training> forTrainee(String traineeUsername, LocalDate from, LocalDate to,
-                                                      String trainerName, String trainingTypeName) {
+    public static Specification<Training> forTrainee(String traineeUsername, TraineeTrainingCriteria criteria) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             Join<?, ?> trainee = root.join("trainee");
             Join<?, ?> trainer = root.join("trainer");
             predicates.add(cb.equal(trainee.get("username"), traineeUsername));
-            addDateRange(predicates, cb, root.get("trainingDate"), from, to);
-            if (hasText(trainerName)) {
-                predicates.add(nameLike(cb, trainer, trainerName));
+            addDateRange(predicates, cb, root.get("trainingDate"), criteria.from(), criteria.to());
+            if (hasText(criteria.trainerName())) {
+                predicates.add(nameLike(cb, trainer, criteria.trainerName()));
             }
-            if (hasText(trainingTypeName)) {
+            if (hasText(criteria.trainingType())) {
                 Join<?, ?> type = root.join("trainingType");
-                predicates.add(cb.equal(cb.lower(type.get("name")), trainingTypeName.trim().toLowerCase()));
+                predicates.add(cb.equal(cb.lower(type.get("name")), criteria.trainingType().trim().toLowerCase()));
             }
             return cb.and(predicates.toArray(new Predicate[0]));
         };
     }
 
-    public static Specification<Training> forTrainer(String trainerUsername, LocalDate from, LocalDate to,
-                                                     String traineeName) {
+    public static Specification<Training> forTrainer(String trainerUsername, TrainerTrainingCriteria criteria) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             Join<?, ?> trainer = root.join("trainer");
             Join<?, ?> trainee = root.join("trainee");
             predicates.add(cb.equal(trainer.get("username"), trainerUsername));
-            addDateRange(predicates, cb, root.get("trainingDate"), from, to);
-            if (hasText(traineeName)) {
-                predicates.add(nameLike(cb, trainee, traineeName));
+            addDateRange(predicates, cb, root.get("trainingDate"), criteria.from(), criteria.to());
+            if (hasText(criteria.traineeName())) {
+                predicates.add(nameLike(cb, trainee, criteria.traineeName()));
             }
             return cb.and(predicates.toArray(new Predicate[0]));
         };

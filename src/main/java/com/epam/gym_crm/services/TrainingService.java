@@ -1,6 +1,8 @@
 package com.epam.gym_crm.services;
 
 import com.epam.gym_crm.dtos.TrainingDTO;
+import com.epam.gym_crm.dtos.TraineeTrainingCriteria;
+import com.epam.gym_crm.dtos.TrainerTrainingCriteria;
 import com.epam.gym_crm.entities.Trainee;
 import com.epam.gym_crm.entities.Trainer;
 import com.epam.gym_crm.entities.Training;
@@ -21,7 +23,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -84,27 +85,24 @@ public class TrainingService {
     private static final Sort BY_DATE = Sort.by("trainingDate", "id");
 
     @Transactional(readOnly = true)
-    public List<Training> getTraineeTrainings(@NotBlank String traineeUsername, LocalDate from, LocalDate to,
-                                              String trainerName, String trainingType) {
+    public List<Training> getTraineeTrainings(@NotBlank String traineeUsername,
+                                              @NotNull TraineeTrainingCriteria criteria) {
         if (!traineeRepository.existsByUsername(traineeUsername)) {
             throw new NoSuchElementException("Trainee not found: " + traineeUsername);
         }
-        log.debug("Searching trainings of trainee {} from={} to={} trainer={} type={}",
-                traineeUsername, from, to, trainerName, trainingType);
+        log.debug("Searching trainings of trainee {} with {}", traineeUsername, criteria);
         return trainingRepository.findAll(
-                TrainingSpecifications.forTrainee(traineeUsername, from, to, trainerName, trainingType), BY_DATE);
+                TrainingSpecifications.forTrainee(traineeUsername, criteria), BY_DATE);
     }
 
-    /** Req. 15: trainings de un trainer; todos los criterios (menos el username) son opcionales. */
     @Transactional(readOnly = true)
-    public List<Training> getTrainerTrainings(@NotBlank String trainerUsername, LocalDate from, LocalDate to,
-                                              String traineeName) {
+    public List<Training> getTrainerTrainings(@NotBlank String trainerUsername,
+                                              @NotNull TrainerTrainingCriteria criteria) {
         if (!trainerRepository.existsByUsername(trainerUsername)) {
             throw new NoSuchElementException("Trainer not found: " + trainerUsername);
         }
-        log.debug("Searching trainings of trainer {} from={} to={} trainee={}",
-                trainerUsername, from, to, traineeName);
+        log.debug("Searching trainings of trainer {} with {}", trainerUsername, criteria);
         return trainingRepository.findAll(
-                TrainingSpecifications.forTrainer(trainerUsername, from, to, traineeName), BY_DATE);
+                TrainingSpecifications.forTrainer(trainerUsername, criteria), BY_DATE);
     }
 }

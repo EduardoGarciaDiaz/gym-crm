@@ -2,7 +2,9 @@ package com.epam.gym_crm.facade;
 
 import com.epam.gym_crm.dtos.Credentials;
 import com.epam.gym_crm.dtos.TraineeDTO;
+import com.epam.gym_crm.dtos.TraineeTrainingCriteria;
 import com.epam.gym_crm.dtos.TrainerDTO;
+import com.epam.gym_crm.dtos.TrainerTrainingCriteria;
 import com.epam.gym_crm.dtos.TrainingDTO;
 import com.epam.gym_crm.entities.Trainee;
 import com.epam.gym_crm.entities.Trainer;
@@ -241,21 +243,22 @@ class GymFacadeTest {
 
     @Test
     void getTraineeTrainings_usesOwnUsernameAndPassesCriteria() {
-        LocalDate from = LocalDate.of(2026, 1, 1);
-        LocalDate to = LocalDate.of(2026, 12, 31);
+        TraineeTrainingCriteria criteria = new TraineeTrainingCriteria(
+                LocalDate.of(2026, 1, 1), LocalDate.of(2026, 12, 31), "ana", "Yoga");
         List<Training> trainings = List.of(new Training());
-        when(trainingService.getTraineeTrainings("John.Smith", from, to, "ana", "Yoga")).thenReturn(trainings);
+        when(trainingService.getTraineeTrainings("John.Smith", criteria)).thenReturn(trainings);
 
-        assertThat(facade.getTraineeTrainings(john, from, to, "ana", "Yoga")).isSameAs(trainings);
+        assertThat(facade.getTraineeTrainings(john, criteria)).isSameAs(trainings);
         verify(authenticationService).authenticateTrainee(john);
     }
 
     @Test
     void getTrainerTrainings_usesOwnUsernameAndPassesCriteria() {
+        TrainerTrainingCriteria criteria = new TrainerTrainingCriteria(null, null, "john");
         List<Training> trainings = List.of(new Training());
-        when(trainingService.getTrainerTrainings("Ana.Torres", null, null, "john")).thenReturn(trainings);
+        when(trainingService.getTrainerTrainings("Ana.Torres", criteria)).thenReturn(trainings);
 
-        assertThat(facade.getTrainerTrainings(ana, null, null, "john")).isSameAs(trainings);
+        assertThat(facade.getTrainerTrainings(ana, criteria)).isSameAs(trainings);
         verify(authenticationService).authenticateTrainer(ana);
     }
 
@@ -264,7 +267,7 @@ class GymFacadeTest {
         doThrow(new AuthenticationException("Invalid username or password"))
                 .when(authenticationService).authenticateTrainee(john);
 
-        assertThatThrownBy(() -> facade.getTraineeTrainings(john, null, null, null, null))
+        assertThatThrownBy(() -> facade.getTraineeTrainings(john, TraineeTrainingCriteria.none()))
                 .isInstanceOf(AuthenticationException.class);
         verifyNoInteractions(trainingService);
     }

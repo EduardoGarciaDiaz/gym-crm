@@ -2,7 +2,9 @@ package com.epam.gym_crm.facade;
 
 import com.epam.gym_crm.dtos.Credentials;
 import com.epam.gym_crm.dtos.TraineeDTO;
+import com.epam.gym_crm.dtos.TraineeTrainingCriteria;
 import com.epam.gym_crm.dtos.TrainerDTO;
+import com.epam.gym_crm.dtos.TrainerTrainingCriteria;
 import com.epam.gym_crm.dtos.TrainingDTO;
 import com.epam.gym_crm.entities.Trainee;
 import com.epam.gym_crm.entities.Trainer;
@@ -13,7 +15,6 @@ import com.epam.gym_crm.services.TrainerService;
 import com.epam.gym_crm.services.TrainingService;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -78,10 +79,9 @@ public class GymFacade {
         return traineeService.getUnassignedTrainers(auth.username());
     }
 
-    public List<Training> getTraineeTrainings(Credentials auth, LocalDate from, LocalDate to,
-                                              String trainerName, String trainingType) {
+    public List<Training> getTraineeTrainings(Credentials auth, TraineeTrainingCriteria criteria) {
         authenticationService.authenticateTrainee(auth);
-        return trainingService.getTraineeTrainings(auth.username(), from, to, trainerName, trainingType);
+        return trainingService.getTraineeTrainings(auth.username(), criteria);
     }
 
     public Trainer createTrainer(TrainerDTO dto) {
@@ -109,9 +109,9 @@ public class GymFacade {
         return trainerService.toggleStatus(auth.username());
     }
 
-    public List<Training> getTrainerTrainings(Credentials auth, LocalDate from, LocalDate to, String traineeName) {
+    public List<Training> getTrainerTrainings(Credentials auth, TrainerTrainingCriteria criteria) {
         authenticationService.authenticateTrainer(auth);
-        return trainingService.getTrainerTrainings(auth.username(), from, to, traineeName);
+        return trainingService.getTrainerTrainings(auth.username(), criteria);
     }
 
     public Training createTraining(Credentials auth, TrainingDTO dto) {
