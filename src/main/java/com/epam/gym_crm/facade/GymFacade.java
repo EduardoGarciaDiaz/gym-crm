@@ -1,11 +1,6 @@
 package com.epam.gym_crm.facade;
 
-import com.epam.gym_crm.dtos.Credentials;
-import com.epam.gym_crm.dtos.TraineeDTO;
-import com.epam.gym_crm.dtos.TraineeTrainingCriteria;
-import com.epam.gym_crm.dtos.TrainerDTO;
-import com.epam.gym_crm.dtos.TrainerTrainingCriteria;
-import com.epam.gym_crm.dtos.TrainingDTO;
+import com.epam.gym_crm.dtos.*;
 import com.epam.gym_crm.entities.Trainee;
 import com.epam.gym_crm.entities.Trainer;
 import com.epam.gym_crm.entities.Training;
@@ -43,7 +38,7 @@ public class GymFacade {
         return authenticationService.matchesTrainer(auth);
     }
 
-    public Trainee createTrainee(TraineeDTO dto) {
+    public CreateUserResponseDTO createTrainee(TraineeDTO dto) {
         return traineeService.createTrainee(dto);
     }
 
@@ -84,7 +79,7 @@ public class GymFacade {
         return trainingService.getTraineeTrainings(auth.username(), criteria);
     }
 
-    public Trainer createTrainer(TrainerDTO dto) {
+    public CreateUserResponseDTO createTrainer(TrainerDTO dto) {
         return trainerService.createTrainer(dto);
     }
 

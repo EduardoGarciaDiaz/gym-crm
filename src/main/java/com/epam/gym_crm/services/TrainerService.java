@@ -1,5 +1,6 @@
 package com.epam.gym_crm.services;
 
+import com.epam.gym_crm.dtos.CreateUserResponseDTO;
 import com.epam.gym_crm.dtos.TrainerDTO;
 import com.epam.gym_crm.entities.Trainer;
 import com.epam.gym_crm.entities.TrainingType;
@@ -59,7 +60,7 @@ public class TrainerService {
         this.trainerMapper = trainerMapper;
     }
 
-    public Trainer createTrainer(@NotNull @Valid TrainerDTO trainerDTO) {
+    public CreateUserResponseDTO createTrainer(@NotNull @Valid TrainerDTO trainerDTO) {
         String firstName = trainerDTO.getFirstName();
         String lastName = trainerDTO.getLastName();
         String username = credentialsGenerator.generateUsername(firstName, lastName, userRepository::existsByUsername);
@@ -74,7 +75,7 @@ public class TrainerService {
 
         newTrainer = trainerRepository.save(newTrainer);
         log.info("Trainer created with id={} and username={}", newTrainer.getId(), newTrainer.getUsername());
-        return newTrainer;
+        return new CreateUserResponseDTO(newTrainer.getUsername(), newTrainer.getPassword());
     }
 
     public Trainer updateTrainer(@NotBlank String username, @NotNull @Valid TrainerDTO trainerDTO) {

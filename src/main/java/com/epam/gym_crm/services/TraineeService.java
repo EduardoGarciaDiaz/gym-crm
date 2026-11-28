@@ -1,6 +1,7 @@
 package com.epam.gym_crm.services;
 
 import com.epam.gym_crm.dtos.TraineeDTO;
+import com.epam.gym_crm.dtos.CreateUserResponseDTO;
 import com.epam.gym_crm.entities.Trainee;
 import com.epam.gym_crm.entities.Trainer;
 import com.epam.gym_crm.mappers.TraineeMapper;
@@ -60,7 +61,7 @@ public class TraineeService {
         this.traineeMapper = traineeMapper;
     }
 
-    public Trainee createTrainee(@NotNull @Valid TraineeDTO traineeDTO) {
+    public CreateUserResponseDTO createTrainee(@NotNull @Valid TraineeDTO traineeDTO) {
         String firstName = traineeDTO.getFirstName();
         String lastName = traineeDTO.getLastName();
         String username = credentialsGenerator.generateUsername(
@@ -76,8 +77,7 @@ public class TraineeService {
 
         newTrainee = traineeRepository.save(newTrainee);
         log.info("Trainee created with id={} and username={}", newTrainee.getId(), newTrainee.getUsername());
-        return newTrainee;
-        //TODO: Return a response DTO
+        return new CreateUserResponseDTO(newTrainee.getUsername(), newTrainee.getPassword());
     }
 
 

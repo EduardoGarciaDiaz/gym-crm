@@ -13,7 +13,7 @@ public class TraineeDTO extends UserDTO {
     public TraineeDTO() {
     }
 
-    public TraineeDTO(String firstName, String lastName, boolean isActive, LocalDate birthdate, String address) {
+    public TraineeDTO(String firstName, String lastName, LocalDate birthdate, String address) {
         super(firstName, lastName);
         this.dateOfBirth = birthdate;
         this.address = address;
